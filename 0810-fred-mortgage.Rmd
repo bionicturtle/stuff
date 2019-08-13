@@ -1,6 +1,8 @@
 ---
 title: "Copy Freddie Mac's cool density plot"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 I like [this visualization by Freddie Mac](https://www.linkedin.com/posts/leonard-kiefer-51175331_30-year-mortgage-rates-in-the-us-are-the-activity-6565603766907744256-YuPJ) cool because it's a unique way of showing a single rate series.
@@ -11,19 +13,52 @@ data at https://fred.stlouisfed.org/series/MORTGAGE30US
 library(tidyverse)
 library(lubridate)
 library(viridis)
+library(grid)
 
-m30 <- read_csv("MORTGAGE30US.csv") #
+
+path_to_files <- file.path("D:/GitHub/_etc/fred")
+path_to_rates <- file.path(path_to_files, "MORTGAGE30US.csv")
+
+m30 <- read_csv(path_to_rates)
 colnames(m30) <- c("date", "rate")
 
 m30 <- m30 %>% mutate(year = year(date))
 m30_2010 <- m30 %>% filter(year >= 2010)
 
+# "#7CAC9E", "#5B8578", "#3B5B52", "#1D302A", "#010202")
+# #ff0000
+
+my_fill_colors <- c("#EBEBEB", "#E3E3DF", "#D8DDD1", "#C6D8C2", "#B2D4BB",
+              "#7CAC9E", "#5B8578", "#3B5B52", "#1D302A", "#010202")
+
+my_border_colors <- c("#EBEBEB", "#E3E3DF", "#D8DDD1", "#C6D8C2", "#B2D4BB",
+              "#7CAC9E", "#5B8578", "#3B5B52", "#1D302A", "#FF0000")
+
+
 m30_2010$year <- factor(m30_2010$year)
-ggplot(m30_2010, aes(x = rate, fill = year, color = year)) + 
+gg <- ggplot(m30_2010, aes(x = rate, fill = year, color = year)) + 
     geom_density(alpha = 0.3) +
-    scale_fill_viridis_d() + 
-    scale_color_viridis_d() +
+    scale_fill_manual(values = my_fill_colors) +
+    scale_color_manual(values = my_border_colors) +
     theme_classic() +
     labs(title = "30-year fixed mortgage rate", y = NULL) +
     scale_y_continuous(breaks = NULL)
+
+text_2015 <- "2015"
+text_2016 <- "2016"
+text_2017 <- "2017"
+text_2018 <- "2018"
+text_2019 <- "2019"
+grob_2015 <- grid.text(text_2015, x = 0.25, y = 0.61, gp = gpar(col="#7CAC9E", fontsize = 11, fontface = "bold"))
+grob_2016 <- grid.text(text_2016, x = 0.06, y = 0.50, gp = gpar(col="#5B8578", fontsize = 12, fontface = "bold"))
+grob_2017 <- grid.text(text_2017, x = 0.40, y = 0.85, gp = gpar(col="#3B5B52", fontsize = 13, fontface = "bold"))
+grob_2018 <- grid.text(text_2018, x = 0.71, y = 0.65, gp = gpar(col="#1D302A", fontsize = 14, fontface = "bold"))
+grob_2019 <- grid.text(text_2019, x = 0.73, y = 0.13, gp = gpar(col="#c40101", fontsize = 15, fontface = "bold"))
+gg + annotation_custom(grob_2015) +
+    annotation_custom(grob_2016) +
+    annotation_custom(grob_2017) +
+    annotation_custom(grob_2018) +
+    annotation_custom(grob_2019)
+
+
 ```
