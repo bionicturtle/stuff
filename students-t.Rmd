@@ -1,0 +1,47 @@
+---
+title: "Student's t"
+output: html_notebook
+---
+
+Most student's t are rended with "stubby" (below normal) peaks but it's an optical illustion because they aren't unit variances; it's not really apples-to-appes. Student's t is *peaked* when we standardize for unit variance.
+
+```{r}
+library(ggplot2); library(dplyr)
+library(metRology)
+
+a_normal <- data.frame(
+    x <- seq(-4, 4, by = 0.05), 
+    y1 = dnorm(x),
+    y2 = dt(x, 3), 
+    y3 = dt(x, 6)
+)
+
+g1 <- a_normal %>% ggplot(aes(x = x, y = y1)) +
+    geom_line(aes(x = x, y = y1, color = "Normal"), size = 1) + 
+    geom_line(aes(x = x, y = y2, color = "t(df=3)"), linetype = "dashed", size = 1) +
+    geom_line(aes(x = x, y = y3, color = "t(df=6)"), linetype = "dashed", size = 1) + 
+    scale_color_manual(values = c('Normal' = 'black','t(df=3)' = 'red', 't(df=6)' = 'blue')) +
+    labs(color = 'Y series') +
+    ylim(0, .6) +
+    theme_classic() + labs(title = "Student's t", x = NULL, y = NULL)
+
+s_normal <- data.frame(
+    x <- seq(-4, 4, by = 0.05), 
+    y1 = dnorm(x),
+    y2 = dt.scaled(x, 3, sd = sqrt(1/3)),# solving for unit variance becauase: 
+    y3 = dt.scaled(x, 6, sd = sqrt(4/6)) # variance of scaled t = sd^2*(df/(df-2))
+)
+
+g2 <- s_normal %>% ggplot(aes(x = x, y = y1)) +
+    geom_line(aes(x = x, y = y1, color = "Normal"), size = 1) + 
+    geom_line(aes(x = x, y = y2, color = "t(df=3)"), linetype = "dashed", size = 1) +
+    geom_line(aes(x = x, y = y3, color = "t(df=6)"), linetype = "dashed", size = 1) + 
+    scale_color_manual(values = c('Normal' = 'black','t(df=3)' = 'red', 't(df=6)' = 'blue')) +
+    labs(color = 'Y series') +
+    ylim(0, .6) +
+    theme_classic() + labs(title = "Student's t", x = NULL, y = NULL)
+
+library(gridExtra)
+grid.arrange(g1, g2, ncol = 2)
+```
+
