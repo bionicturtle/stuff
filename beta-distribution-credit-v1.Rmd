@@ -1,0 +1,86 @@
+---
+title: "Beta distribution for credit risk by David Harper"
+output: html_notebook
+---
+
+Beta distribution for credit risk 
+
+```{r}
+library(tidyverse)
+library(gridExtra)
+# library(scales)
+
+dom <- c(0,0.5)
+
+alpha <- 2; beta <- 23 # beta distribution
+mu <- alpha/(alpha + beta) # mean
+var_b <- (alpha * beta)/((alpha + beta)^2 * (alpha + beta + 1)) #variance
+sd_b <- sqrt(var_b)
+cm1 <- 3 ; # capital multiplers; i.e., r_credit VaR = UL * CM
+cm2 <- 5
+first <- sd_b * cm1 + mu # implied quantile
+second <- sd_b * cm2 + mu
+conf1 <- pbeta(first, alpha, beta) # implied confidence level
+conf2 <- pbeta(second, alpha, beta)
+label1 <- str_c(percent(conf1)," confidence at µ + ", cm1, " * σ")
+label2 <- str_c(percent(conf2)," confidence at µ + ", cm2, " * σ")
+
+p1 <- ggplot(data.frame(x = dom), aes(x = x)) +
+    stat_function(fun = dbeta, size = 2, color = "royalblue3",
+                  args = list(shape1 = alpha, shape2 = beta)) +
+    geom_vline(xintercept = mu, color = "darkgreen", size = 2) + 
+    geom_vline(xintercept = first, color = "red1", size = 2) +
+    geom_vline(xintercept = second, color = "red4", size = 2) +
+    theme_bw(base_size = 12) + 
+    ggtitle(str_c("beta pdf: µ= ", mu, ", sd= ", round(sd_b,3),
+                  ", conf1= ", percent(round(conf1, 3)), ", conf2= ", percent(round(conf2, 3)))) +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.x = element_text(face = "bold", size = 12),
+          axis.text.y = element_text(face = "bold", size = 12)) +
+    annotate("rect", xmin = first - .1, xmax = first + .1 , ymin = 5.5, ymax = 6.5, fill = "white") +
+    annotate("rect", xmin = second - .1, xmax = second + .01 , ymin = 4.5, ymax = 5.5, fill = "white") +
+    annotate("text", x = first, y = 6, label = label1, color = "red1" ) +
+    annotate("text", x = second, y = 5, label = label2, color = "red4")
+
+p1
+
+```
+
+Without annotations
+```{r}
+dom <- c(0,0.5)
+
+alpha <- 2; beta <- 23 # beta distribution
+mu <- alpha/(alpha + beta) # mean
+var_b <- (alpha * beta)/((alpha + beta)^2 * (alpha + beta + 1)) #variance
+sd_b <- sqrt(var_b)
+cm1 <- 3 ; # capital multiplers; i.e., r_credit VaR = UL * CM
+cm2 <- 5
+first <- sd_b * cm1 + mu # implied quantile
+second <- sd_b * cm2 + mu
+conf1 <- pbeta(first, alpha, beta) # implied confidence level
+conf2 <- pbeta(second, alpha, beta)
+label1 <- str_c(percent(conf1)," confidence at µ + ", cm1, " * σ")
+label2 <- str_c(percent(conf2)," confidence at µ + ", cm2, " * σ")
+
+p1 <- ggplot(data.frame(x = dom), aes(x = x)) +
+    stat_function(fun = dbeta, size = 2, color = "royalblue3",
+                  args = list(shape1 = alpha, shape2 = beta)) +
+    geom_vline(xintercept = mu, color = "darkgreen", size = 2) + 
+    geom_vline(xintercept = first, color = "red1", size = 2) +
+    geom_vline(xintercept = second, color = "red4", size = 2) +
+    theme_bw(base_size = 12) + 
+    ggtitle(str_c("beta pdf: µ= ", mu, ", sd= ", round(sd_b,3),
+                  ", conf1= ", percent(round(conf1, 3)), ", conf2= ", percent(round(conf2, 3)))) +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.x = element_text(face = "bold", size = 12),
+          axis.text.y = element_text(face = "bold", size = 12))
+    # annotate("rect", xmin = first - .1, xmax = first + .1 , ymin = 5.5, ymax = 6.5, fill = "white") +
+    # annotate("rect", xmin = second - .1, xmax = second + .01 , ymin = 4.5, ymax = 5.5, fill = "white") +
+    # annotate("text", x = first, y = 6, label = label1, color = "red1" ) +
+    # annotate("text", x = second, y = 5, label = label2, color = "red4")
+
+p1
+```
